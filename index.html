@@ -160,6 +160,21 @@
       animation: blink 1s step-end infinite;
     }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    #typing-box {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 1rem;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--color-border-md);
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: none;
+      outline: none;
+    }
+    #typing-box:focus { border-color: var(--color-purple); }
     .demo-stats { display: flex; gap: 12px; }
     .demo-stat {
       flex: 1;
@@ -345,8 +360,9 @@
     <div class="demo-text" id="demo-text">
       <span class="typed" id="typed-text">量子コンピュータは、量子力学の原理を</span>利用して計算を行う次世代のコンピュータです。従来のビットに代わり量子ビット（qubit）を用いることで、複雑な問題を高速に処理できます。<span class="cursor"></span>
     </div>
+    <textarea id="typing-box" placeholder="ここに入力" rows="3"></textarea>
     <div class="demo-stats">
-      <div class="demo-stat"><div class="val" id="wpm-val">42</div><div class="lbl">文字/分</div></div>
+      <div class="demo-stat"><div class="val" id="wpm-val">80</div><div class="lbl">文字/分</div></div>
       <div class="demo-stat"><div class="val" id="acc-val">96%</div><div class="lbl">正確率</div></div>
       <div class="demo-stat"><div class="val" id="time-val">1:23</div><div class="lbl">経過時間</div></div>
     </div>
