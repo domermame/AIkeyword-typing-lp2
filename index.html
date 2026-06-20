@@ -101,6 +101,31 @@
     }
     .btn-secondary:hover { background: var(--color-bg-secondary); }
 
+    /* ---- Demo tabs ---- */
+    .demo-tabs {
+      display: flex;
+      gap: 0;
+      margin: 2rem 1.5rem 0;
+      border-bottom: 0.5px solid var(--color-border);
+    }
+    .demo-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      text-decoration: none;
+      color: var(--color-text-secondary);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -0.5px;
+    }
+    .demo-tab:hover { color: var(--color-text-primary); }
+    .demo-tab.active {
+      color: var(--color-purple);
+      border-bottom-color: var(--color-purple);
+      font-weight: 500;
+    }
+
     /* ---- Demo box ---- */
     .demo-box {
       margin: 2rem 1.5rem;
@@ -349,6 +374,16 @@
       <a class="btn-secondary" href="#demo">デモを見る</a>
     </div>
   </section>
+
+  <!-- Demo tabs -->
+  <div class="demo-tabs">
+    <a class="demo-tab active" href="#demo">
+      <i class="ti ti-keyboard" aria-hidden="true"></i> キーボード入力
+    </a>
+    <a class="demo-tab" href="demo-voice.html">
+      <i class="ti ti-volume" aria-hidden="true"></i> 音声読み上げ
+    </a>
+  </div>
 
   <!-- Demo -->
   <div class="demo-box" id="demo">

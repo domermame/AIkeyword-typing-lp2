@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>音声読み上げデモ — キーワードタイピング練習アプリ</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --color-bg: #ffffff;
+      --color-bg-secondary: #f5f4f0;
+      --color-bg-info: #e6f1fb;
+      --color-text-primary: #1a1a18;
+      --color-text-secondary: #5f5e5a;
+      --color-text-info: #185fa5;
+      --color-border: rgba(0,0,0,0.12);
+      --color-border-md: rgba(0,0,0,0.22);
+      --color-purple-bg: #eeedfe;
+      --color-purple: #534ab7;
+      --color-teal-bg: #e1f5ee;
+      --color-teal: #0f6e56;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: #1c1c1a;
+        --color-bg-secondary: #252523;
+        --color-bg-info: #042c53;
+        --color-text-primary: #f0ede8;
+        --color-text-secondary: #b4b2a9;
+        --color-text-info: #85b7eb;
+        --color-border: rgba(255,255,255,0.12);
+        --color-border-md: rgba(255,255,255,0.22);
+        --color-purple-bg: #26215c;
+        --color-purple: #afa9ec;
+        --color-teal-bg: #04342c;
+        --color-teal: #5dcaa5;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+    /* ---- Header ---- */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.5rem 0 2rem;
+      border-bottom: 0.5px solid var(--color-border);
+      margin-bottom: 2rem;
+    }
+    .back-link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .back-link:hover { color: var(--color-text-primary); }
+    .page-header h1 { font-size: 1.2rem; font-weight: 500; }
+    .badge-voice {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--color-teal-bg);
+      color: var(--color-teal);
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: var(--radius-md);
+      margin-left: auto;
+    }
+
+    /* ---- Step labels ---- */
+    .step-label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-purple-bg);
+      color: var(--color-purple);
+      font-size: 11px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ---- Keyword input ---- */
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--color-border-md);
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-size: 15px;
+      outline: none;
+    }
+    .input-row input:focus { border-color: var(--color-purple); }
+    .btn-generate {
+      padding: 10px 20px;
+      background: var(--color-purple);
+      color: var(--color-purple-bg);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-generate:hover { opacity: 0.88; }
+
+    /* ---- Generated text box ---- */
+    .text-box {
+      background: var(--color-bg-secondary);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      font-size: 15px;
+      line-height: 1.9;
+      margin-bottom: 1rem;
+      min-height: 6rem;
+      position: relative;
+    }
+    .text-box .highlight { background: #fef08a; border-radius: 2px; color: #1a1a18; }
+
+    /* ---- Voice controls ---- */
+    .voice-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-play {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--color-teal);
+      color: var(--color-teal-bg);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-play:hover { opacity: 0.88; }
+    .btn-play:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-stop {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: 0.5px solid var(--color-border-md);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-stop:hover { background: var(--color-bg-secondary); }
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .speed-control select {
+      padding: 6px 10px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--color-border-md);
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+    .status-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-md);
+      background: var(--color-bg-secondary);
+      color: var(--color-text-secondary);
+      border: 0.5px solid var(--color-border);
+    }
+    .status-badge.playing {
+      background: var(--color-teal-bg);
+      color: var(--color-teal);
+      border-color: transparent;
+    }
+
+    /* ---- Typing area ---- */
+    #typing-box {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--color-border-md);
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: none;
+      outline: none;
+      margin-bottom: 1rem;
+    }
+    #typing-box:focus { border-color: var(--color-purple); }
+
+    /* ---- Stats ---- */
+    .stats { display: flex; gap: 12px; margin-bottom: 2rem; }
+    .stat {
+      flex: 1;
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+      border: 0.5px solid var(--color-border);
+    }
+    .stat .val { font-size: 22px; font-weight: 500; }
+    .stat .lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+
+    /* ---- Tip box ---- */
+    .tip {
+      background: var(--color-bg-info);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      font-size: 13px;
+      color: var(--color-text-info);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .tip i { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    .divider { height: 0.5px; background: var(--color-border); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <a class="back-link" href="index.html"><i class="ti ti-arrow-left"></i> トップに戻る</a>
+    <h1>音声読み上げデモ</h1>
+    <span class="badge-voice"><i class="ti ti-volume"></i> 音声あり</span>
+  </div>
+
+  <!-- Step 1: キーワード入力 -->
+  <div class="step-label"><span class="step-num">1</span> キーワードを入力して練習文を生成</div>
+  <div class="input-row">
+    <input type="text" id="kw-input" placeholder="例：バリアフリー、人工知能、要約筆記 …" />
+    <button class="btn-generate" onclick="generateText()">
+      <i class="ti ti-sparkles" aria-hidden="true"></i> 生成
+    </button>
+  </div>
+
+  <!-- Generated text -->
+  <div class="step-label"><span class="step-num">2</span> 生成された練習文を音声で聴く</div>
+  <div class="text-box" id="text-box">
+    キーワードを入力して「生成」を押すと、練習文がここに表示されます。音声ボタンで読み上げを開始してください。
+  </div>
+
+  <!-- Voice controls -->
+  <div class="voice-controls">
+    <button class="btn-play" id="btn-play" onclick="startSpeech()" disabled>
+      <i class="ti ti-player-play" aria-hidden="true"></i> 読み上げ開始
+    </button>
+    <button class="btn-stop" id="btn-stop" onclick="stopSpeech()">
+      <i class="ti ti-player-stop" aria-hidden="true"></i> 停止
+    </button>
+    <span class="status-badge" id="status-badge">待機中</span>
+    <div class="speed-control">
+      <i class="ti ti-gauge" aria-hidden="true"></i>
+      <span>速度</span>
+      <select id="speed-select" onchange="updateSpeed()">
+        <option value="0.6">遅い</option>
+        <option value="0.8" selected>普通</option>
+        <option value="1.0">やや速い</option>
+        <option value="1.2">速い</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Step 3: タイピング -->
+  <div class="step-label"><span class="step-num">3</span> 聴きながら入力練習</div>
+  <textarea id="typing-box" rows="4" placeholder="ここに入力" oninput="updateStats()"></textarea>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="val" id="stat-chars">0</div><div class="lbl">入力文字数</div></div>
+    <div class="stat"><div class="val" id="stat-wpm">—</div><div class="lbl">文字/分</div></div>
+    <div class="stat"><div class="val" id="stat-acc">—</div><div class="lbl">正確率</div></div>
+    <div class="stat"><div class="val" id="stat-time">0:00</div><div class="lbl">経過時間</div></div>
+  </div>
+
+  <!-- Tip -->
+  <div class="tip">
+    <i class="ti ti-info-circle" aria-hidden="true"></i>
+    <span>音声読み上げにはブラウザ内蔵の音声合成を使用しています。「遅い」設定で読み上げながら入力すると、要約筆記の本番練習に近い環境が作れます。</span>
+  </div>
+
+</div>
+
+<script>
+  const samples = {
+    'バリアフリー': 'バリアフリーとは、障がいのある人や高齢者が生活しやすいよう、物理的・社会的な障壁を取り除く考え方です。建築物のスロープ設置や点字ブロックの整備、また手話通訳や要約筆記の提供なども、バリアフリーの重要な取り組みです。',
+    '人工知能': '人工知能（AI）は、機械が人間のような知的判断を行う技術の総称です。機械学習や深層学習の発展により、画像認識や自然言語処理など幅広い分野で活用が進んでいます。今後の社会では、AIと共に学び、考える力がますます重要になるでしょう。',
+    '要約筆記': '要約筆記とは、話し言葉を聴覚障がい者にリアルタイムで伝えるために、内容を要約しながら文字に書き起こす情報保障の手段です。講演や会議の場で活躍する要約筆記者は、素早いタイピングと内容理解の両方が求められます。',
+    '量子コンピュータ': '量子コンピュータは、量子力学の原理を利用して計算を行う次世代のコンピュータです。従来のビットに代わり量子ビット（qubit）を用いることで、複雑な問題を高速に処理できます。医療や暗号技術など、さまざまな分野への応用が期待されています。',
+    'default': 'このアプリでは、あなたが入力したキーワードをもとにAIが練習文を自動生成し、音声で読み上げます。聴きながらタイピングすることで、要約筆記の現場に近い練習環境をどこでも手軽に作ることができます。'
+  };
+
+  let currentText = '';
+  let utterance = null;
+  let startTime = null;
+  let timerInterval = null;
+
+  function generateText() {
+    const kw = document.getElementById('kw-input').value.trim();
+    currentText = samples[kw] || samples['default'];
+    document.getElementById('text-box').textContent = currentText;
+    document.getElementById('btn-play').disabled = false;
+    document.getElementById('typing-box').value = '';
+    resetStats();
+    stopSpeech();
+  }
+
+  function startSpeech() {
+    if (!currentText) return;
+    stopSpeech();
+
+    const speed = parseFloat(document.getElementById('speed-select').value);
+    utterance = new SpeechSynthesisUtterance(currentText);
+    utterance.lang = 'ja-JP';
+    utterance.rate = speed;
+
+    utterance.onstart = () => {
+      setStatus(true);
+      if (!startTime) startTimer();
+    };
+    utterance.onend = () => setStatus(false);
+    utterance.onerror = () => setStatus(false);
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function stopSpeech() {
+    window.speechSynthesis.cancel();
+    setStatus(false);
+  }
+
+  function updateSpeed() {
+    if (window.speechSynthesis.speaking) {
+      startSpeech();
+    }
+  }
+
+  function setStatus(playing) {
+    const badge = document.getElementById('status-badge');
+    const btn = document.getElementById('btn-play');
+    if (playing) {
+      badge.textContent = '読み上げ中';
+      badge.classList.add('playing');
+      btn.innerHTML = '<i class="ti ti-player-play"></i> 読み上げ中…';
+    } else {
+      badge.textContent = '待機中';
+      badge.classList.remove('playing');
+      btn.innerHTML = '<i class="ti ti-player-play"></i> 読み上げ開始';
+    }
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const m = Math.floor(elapsed / 60);
+      const s = elapsed % 60;
+      document.getElementById('stat-time').textContent = m + ':' + String(s).padStart(2, '0');
+      updateWpm(elapsed);
+    }, 1000);
+  }
+
+  function resetStats() {
+    clearInterval(timerInterval);
+    startTime = null;
+    document.getElementById('stat-chars').textContent = '0';
+    document.getElementById('stat-wpm').textContent = '—';
+    document.getElementById('stat-acc').textContent = '—';
+    document.getElementById('stat-time').textContent = '0:00';
+  }
+
+  function updateStats() {
+    if (!startTime) startTimer();
+    const typed = document.getElementById('typing-box').value;
+    const chars = typed.length;
+    document.getElementById('stat-chars').textContent = chars;
+
+    let correct = 0;
+    for (let i = 0; i < Math.min(typed.length, currentText.length); i++) {
+      if (typed[i] === currentText[i]) correct++;
+    }
+    if (chars > 0) {
+      document.getElementById('stat-acc').textContent = Math.round(correct / chars * 100) + '%';
+    }
+  }
+
+  function updateWpm(elapsed) {
+    if (elapsed < 5) return;
+    const typed = document.getElementById('typing-box').value.length;
+    const wpm = Math.round(typed / (elapsed / 60));
+    if (typed > 0) document.getElementById('stat-wpm').textContent = wpm;
+  }
+</script>
+
+</body>
+</html>
